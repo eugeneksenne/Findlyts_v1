@@ -1,0 +1,9 @@
+{
+  "name": "FOMO",
+  "description": "Find real-time night clubs near your location",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera",
+    "microphone"
+  ]
+}
