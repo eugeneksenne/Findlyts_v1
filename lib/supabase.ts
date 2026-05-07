@@ -1,17 +1,35 @@
 import { createClient } from '@supabase/supabase-js';
 
-const apiUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://xyzcompany.supabase.co';
-const supabaseUrl = apiUrl.startsWith('http') ? apiUrl : 'https://xyzcompany.supabase.co';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
-const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'public-anon-key';
-const supabaseAnonKey = anonKey.trim() !== '' ? anonKey : 'public-anon-key';
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
-console.log("Supabase Init:", { supabaseUrl, supabaseAnonKey });
+const createNoopSupabase = () => {
+  const channelApi = {
+    on: () => channelApi,
+    subscribe: (_cb?: any) => channelApi,
+    send: async () => ({ data: null, error: null }),
+  };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: supabaseAnonKey !== 'public-anon-key',
-    autoRefreshToken: supabaseAnonKey !== 'public-anon-key',
-    detectSessionInUrl: supabaseAnonKey !== 'public-anon-key',
-  },
-});
+  return {
+    channel: () => channelApi,
+    removeChannel: () => undefined,
+  } as any;
+};
+
+export const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl!, supabaseAnonKey!, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    })
+  : createNoopSupabase();
+
+if (!isSupabaseConfigured) {
+  console.warn(
+    'Supabase env vars are not configured. Running in offline-safe mode with realtime disabled.',
+  );
+}
