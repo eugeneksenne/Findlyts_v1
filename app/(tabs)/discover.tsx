@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ImageBackground, Image, TextInput } from 'react-native';
-import { Search, MapPin, Users, ChevronRight, Bell, Zap, Flame, Shield, Map as MapIcon, Compass } from 'lucide-react-native';
+import { Search, MapPin, Users, ChevronRight, Bell, Zap, Flame, Shield, Compass } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { fetchOsrmRouteSummary } from '../../lib/osrm';
 
 // Dummy data aligned with the FOMO spec
 const FLASH_DROPS = [
@@ -13,6 +14,7 @@ const FLASH_DROPS = [
     vibe: 'High Vibe',
     timeLeft: '27 min left',
     image: 'https://images.unsplash.com/photo-1541339907198-e08756ebafe3?auto=format&fit=crop&w=600&q=80',
+    destination: { lat: -26.205, lng: 28.043 },
   },
   {
     id: 'f2',
@@ -22,6 +24,7 @@ const FLASH_DROPS = [
     vibe: 'Trending',
     timeLeft: '1h 5m left',
     image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
+    destination: { lat: -26.18, lng: 28.03 },
   }
 ];
 
@@ -74,6 +77,25 @@ export default function DiscoverScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const filteredFlashDrops = useMemo(() => FLASH_DROPS.filter((drop) => normalizedQuery === '' || [drop.title, drop.club, drop.vibe].join(' ').toLowerCase().includes(normalizedQuery)), [normalizedQuery]);
+  const filteredClubs = useMemo(() => TRENDING_CLUBS.filter((club) => normalizedQuery === '' || [club.name, ...club.tags].join(' ').toLowerCase().includes(normalizedQuery)), [normalizedQuery]);
+  const filteredPeople = useMemo(() => PEOPLE_SUGGESTIONS.filter((person) => normalizedQuery === '' || person.name.toLowerCase().includes(normalizedQuery)), [normalizedQuery]);
+  const filteredCategories = useMemo(() => CATEGORIES.filter((category) => normalizedQuery === '' || category.name.toLowerCase().includes(normalizedQuery)), [normalizedQuery]);
+  const [eventRouteMeta, setEventRouteMeta] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    filteredFlashDrops.forEach(async (drop: any) => {
+      if (!drop.destination || eventRouteMeta[drop.id]) return;
+      const summary = await fetchOsrmRouteSummary({ lat: -26.2041, lng: 28.0473 }, drop.destination);
+      if (summary) {
+        setEventRouteMeta((prev) => ({ ...prev, [drop.id]: summary.label }));
+      }
+    });
+  }, [filteredFlashDrops, eventRouteMeta]);
+
+
   return (
     <View className="flex-1 bg-[#0D0F14]">
       {/* Top Header */}
@@ -92,10 +114,10 @@ export default function DiscoverScreen() {
             </View>
           </View>
           <View className="flex-row gap-3">
-            <TouchableOpacity className="w-10 h-10 rounded-full bg-[#151922] items-center justify-center border border-white/10 relative">
+            <TouchableOpacity onPress={() => router.push('/nightguard')} className="w-10 h-10 rounded-full bg-[#151922] items-center justify-center border border-white/10 relative">
               <Shield size={18} color="#D900FF" />
             </TouchableOpacity>
-            <TouchableOpacity className="w-10 h-10 rounded-full bg-[#151922] items-center justify-center border border-white/10 relative">
+            <TouchableOpacity onPress={() => router.push('/settings-advanced/notifications')} className="w-10 h-10 rounded-full bg-[#151922] items-center justify-center border border-white/10 relative">
               <Bell size={18} color="#fff" />
               <View className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-[#FF0080]" />
             </TouchableOpacity>
@@ -128,8 +150,8 @@ export default function DiscoverScreen() {
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4" contentContainerStyle={{ paddingRight: 32 }}>
-            {FLASH_DROPS.map(drop => (
-              <TouchableOpacity key={drop.id} className="w-[280px] h-[160px] mr-4 rounded-3xl overflow-hidden border border-white/10 relative">
+            {filteredFlashDrops.map(drop => (
+              <TouchableOpacity key={drop.id} onPress={() => router.push(`/club/${drop.club.toLowerCase().replace(/\s+/g, '-')}`)} className="w-[280px] h-[160px] mr-4 rounded-3xl overflow-hidden border border-white/10 relative">
                 <ImageBackground source={{ uri: drop.image }} className="w-full h-full">
                   <View className="absolute inset-0 bg-[#0D0F14]/50" />
                   <View className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
@@ -148,7 +170,7 @@ export default function DiscoverScreen() {
                       <Text className="text-[#D900FF] font-black text-xl mb-0.5 tracking-tight">{drop.title}</Text>
                       <View className="flex-row items-center">
                         <Text className="text-white font-bold text-sm mr-2">{drop.club}</Text>
-                        <Text className="text-white/60 font-semibold text-xs">• {drop.distance}</Text>
+                        <Text className="text-white/60 font-semibold text-xs">• {eventRouteMeta[drop.id] || drop.distance}</Text>
                       </View>
                     </View>
                   </View>
@@ -165,14 +187,12 @@ export default function DiscoverScreen() {
               <Flame size={20} color="#FF0080" className="mr-2" />
               <Text className="text-white text-xl font-black tracking-tight">Live & Trending</Text>
             </View>
-            <TouchableOpacity>
-              <Text className="text-[#8e8e93] font-bold text-sm">See map</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/map')}><Text className="text-[#8e8e93] font-bold text-sm">See map</Text></TouchableOpacity>
           </View>
 
           <View className="px-4">
-            {TRENDING_CLUBS.map(club => (
-              <TouchableOpacity key={club.id} className="w-full h-[220px] mb-4 rounded-3xl overflow-hidden border border-white/10 relative">
+            {filteredClubs.map(club => (
+              <TouchableOpacity key={club.id} onPress={() => router.push(`/club/${club.id}`)} className="w-full h-[220px] mb-4 rounded-3xl overflow-hidden border border-white/10 relative">
                 <ImageBackground source={{ uri: club.image }} className="w-full h-full">
                   <View className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10" />
                   
@@ -215,7 +235,7 @@ export default function DiscoverScreen() {
                         </View>
                       </View>
                       
-                      <TouchableOpacity className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-lg">
+                      <TouchableOpacity onPress={() => router.push(`/club/${club.id}`)} className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-lg">
                         <ChevronRight size={20} color="#000" />
                       </TouchableOpacity>
                     </View>
@@ -239,7 +259,7 @@ export default function DiscoverScreen() {
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4" contentContainerStyle={{ paddingRight: 32 }}>
-            <TouchableOpacity className="w-[120px] h-[160px] mr-3 rounded-2xl bg-[#151922] border border-white/5 items-center justify-center px-4">
+            <TouchableOpacity onPress={() => router.push('/people')} className="w-[120px] h-[160px] mr-3 rounded-2xl bg-[#151922] border border-white/5 items-center justify-center px-4">
                 <View className="w-14 h-14 rounded-full bg-[#333] mb-3 items-center justify-center border-2 border-dashed border-[#666]">
                    <Compass size={24} color="#8e8e93" />
                 </View>
@@ -247,15 +267,15 @@ export default function DiscoverScreen() {
                 <Text className="text-[#8e8e93] text-[10px] text-center">Find friends instantly</Text>
             </TouchableOpacity>
             
-            {PEOPLE_SUGGESTIONS.map(person => (
-              <View key={person.id} className="w-[120px] h-[160px] mr-3 rounded-2xl bg-[#151922] border border-white/5 items-center justify-center p-3">
+            {filteredPeople.map(person => (
+              <TouchableOpacity key={person.id} onPress={() => router.push(`/user/${person.id}`)} className="w-[120px] h-[160px] mr-3 rounded-2xl bg-[#151922] border border-white/5 items-center justify-center p-3">
                  <Image source={{ uri: person.image }} className="w-16 h-16 rounded-full mb-2" />
                  <Text className="text-white font-bold text-base max-w-full text-center" numberOfLines={1}>{person.name}</Text>
                  <Text className="text-[#8e8e93] text-[10px] font-semibold mb-3 text-center">{person.mutuals} mutuals</Text>
-                 <TouchableOpacity className="w-full py-1.5 rounded bg-white/10 items-center border border-white/10">
+                 <TouchableOpacity onPress={() => router.push(`/user/${person.id}`)} className="w-full py-1.5 rounded bg-white/10 items-center border border-white/10">
                    <Text className="text-white font-bold text-xs">Follow</Text>
                  </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
@@ -267,8 +287,8 @@ export default function DiscoverScreen() {
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4" contentContainerStyle={{ paddingRight: 32 }}>
-            {CATEGORIES.map(category => (
-              <TouchableOpacity key={category.id} className="w-[140px] h-[80px] mr-3 rounded-2xl overflow-hidden border border-white/10">
+            {filteredCategories.map(category => (
+              <TouchableOpacity key={category.id} onPress={() => router.push('/(tabs)/map')} className="w-[140px] h-[80px] mr-3 rounded-2xl overflow-hidden border border-white/10">
                 <ImageBackground source={{ uri: category.image }} className="w-full h-full justify-center px-4">
                   <View className="absolute inset-0 bg-[#0D0F14]/50" />
                   <Text className="text-white font-bold text-sm drop-shadow-md">{category.name}</Text>

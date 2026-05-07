@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, TextInput, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { 
@@ -20,6 +20,9 @@ const CONTACTS_ON_FOMO = [
 export default function FindPeopleScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredSuggestions = useMemo(() => PEOPLE_SUGGESTIONS.filter((p) => normalizedQuery === '' || `${p.name} ${p.username} ${p.seenAt}`.toLowerCase().includes(normalizedQuery)), [normalizedQuery]);
 
   return (
     <SafeAreaView className="flex-1 bg-[#0D0F14]">
@@ -54,7 +57,7 @@ export default function FindPeopleScreen() {
 
         {/* Contacts Connection */}
         <View className="px-4 mb-8">
-           <TouchableOpacity className="bg-[#D900FF]/10 border border-[#D900FF]/20 rounded-3xl p-4 flex-row items-center justify-between">
+           <TouchableOpacity onPress={() => router.push('/settings-advanced/discoverability')} className="bg-[#D900FF]/10 border border-[#D900FF]/20 rounded-3xl p-4 flex-row items-center justify-between">
               <View className="flex-row items-center flex-1">
                  <View className="w-12 h-12 rounded-full bg-[#D900FF]/20 items-center justify-center mr-4">
                     <BookOpen size={20} color="#D900FF" />
@@ -74,8 +77,8 @@ export default function FindPeopleScreen() {
               <Text className="text-white/60 font-black text-[10px] uppercase tracking-widest">People You May Know</Text>
            </View>
            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4" contentContainerStyle={{ paddingRight: 32 }}>
-              {PEOPLE_SUGGESTIONS.map(person => (
-                 <View key={person.id} className="w-[200px] h-[240px] mr-3 rounded-3xl bg-[#151922] border border-white/5 overflow-hidden">
+              {filteredSuggestions.map(person => (
+                 <TouchableOpacity key={person.id} onPress={() => router.push(`/user/${person.id}`)} className="w-[200px] h-[240px] mr-3 rounded-3xl bg-[#151922] border border-white/5 overflow-hidden">
                     <Image source={{ uri: person.image }} className="w-full h-[120px] bg-[#0D0F14]" />
                     
                     <View className="p-3 bg-[#151922] flex-1 justify-between">
@@ -98,11 +101,11 @@ export default function FindPeopleScreen() {
                           </View>
                        </View>
                        
-                       <TouchableOpacity className="w-full py-2 mt-2 rounded-xl bg-white items-center">
+                       <TouchableOpacity onPress={() => router.push(`/user/${person.id}`)} className="w-full py-2 mt-2 rounded-xl bg-white items-center">
                           <Text className="text-black font-black text-xs uppercase tracking-wider">Follow</Text>
                        </TouchableOpacity>
                     </View>
-                 </View>
+                 </TouchableOpacity>
               ))}
            </ScrollView>
         </View>
@@ -123,10 +126,10 @@ export default function FindPeopleScreen() {
                           <Text className="text-[#8e8e93] font-medium text-[10px]">{user.desc}</Text>
                        </View>
                     </View>
-                    <TouchableOpacity className="w-8 h-8 rounded-full bg-white/10 border border-white/20 items-center justify-center">
+                    <TouchableOpacity onPress={() => router.push(`/user/${user.id}`)} className="w-8 h-8 rounded-full bg-white/10 border border-white/20 items-center justify-center">
                        <UserPlus size={14} color="#fff" />
                     </TouchableOpacity>
-                 </View>
+                 </TouchableOpacity>
               ))}
            </View>
         </View>
@@ -145,10 +148,10 @@ export default function FindPeopleScreen() {
                        <Text className="text-white font-bold text-sm mb-0.5">{user.username}</Text>
                        <Text className="text-[#8e8e93] font-medium text-[10px]">{user.desc}</Text>
                     </View>
-                    <TouchableOpacity className="px-3 py-1.5 rounded-full bg-white border border-white/20">
+                    <TouchableOpacity onPress={() => router.push(`/user/${user.id}`)} className="px-3 py-1.5 rounded-full bg-white border border-white/20">
                        <Text className="text-black font-black text-xs">Follow</Text>
                     </TouchableOpacity>
-                 </View>
+                 </TouchableOpacity>
               ))}
            </View>
         </View>

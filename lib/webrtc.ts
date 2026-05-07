@@ -4,8 +4,7 @@ let webrtc: any = {};
 
 if (Platform.OS !== 'web') {
   webrtc = require('react-native-webrtc');
-} else {
-  // Mock or use window objects for web
+} else if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
   webrtc = {
     RTCPeerConnection: window.RTCPeerConnection,
     RTCSessionDescription: window.RTCSessionDescription,
@@ -22,4 +21,3 @@ export const {
   mediaDevices,
   MediaStream,
 } = webrtc;
-

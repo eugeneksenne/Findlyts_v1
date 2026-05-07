@@ -329,26 +329,63 @@ export default function MapScreen() {
   };
 
   const getRoute = async (lat: number, lng: number, nearest: Club, startNav: boolean = false) => {
-    if (!nearest) return;
-    try {
-      const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${lng},${lat};${nearest.lng},${nearest.lat}?overview=full&geometries=geojson&steps=true`);
-      const routeData = await routeRes.json();
-      if (routeData.routes && routeData.routes.length > 0) {
-        const coords = routeData.routes[0].geometry.coordinates.map((c: any) => ({
-          latitude: c[1],
-          longitude: c[0]
-        }));
-        setRouteCoordinates(coords);
+    if (!nearest || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-        if (startNav && routeData.routes[0].legs && routeData.routes[0].legs.length > 0) {
-          setNavigationSteps(routeData.routes[0].legs[0].steps);
-          setCurrentStepIndex(0);
-          setNavDestination(nearest);
-          setIsNavigating(true);
-          startLocationTracking(nearest);
+    const requestRoute = async (profile: 'driving' | 'foot') => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      try {
+        const routeRes = await fetch(
+          `https://router.project-osrm.org/route/v1/${profile}/${lng},${lat};${nearest.lng},${nearest.lat}?overview=full&geometries=geojson&steps=true`,
+          { signal: controller.signal }
+        );
+
+        if (!routeRes.ok) {
+          throw new Error(`OSRM request failed: ${routeRes.status}`);
         }
+
+        const routeData = await routeRes.json();
+        if (!routeData?.routes?.length) {
+          throw new Error('No route returned');
+        }
+
+        return routeData;
+      } finally {
+        clearTimeout(timeoutId);
       }
-    } catch(e) {}
+    };
+
+    try {
+      let routeData;
+      try {
+        routeData = await requestRoute('driving');
+      } catch {
+        routeData = await requestRoute('foot');
+      }
+
+      const primaryRoute = routeData.routes[0];
+      const coords = primaryRoute.geometry.coordinates.map((c: any) => ({
+        latitude: c[1],
+        longitude: c[0]
+      }));
+
+      setRouteCoordinates(coords);
+
+      if (startNav && primaryRoute.legs?.length > 0) {
+        setNavigationSteps(primaryRoute.legs[0].steps || []);
+        setCurrentStepIndex(0);
+        setNavDestination(nearest);
+        setIsNavigating(true);
+        startLocationTracking(nearest);
+      }
+    } catch (error) {
+      console.warn('Route fetch failed', error);
+      setRouteCoordinates([]);
+      if (startNav) {
+        setNavigationSteps([]);
+        setIsNavigating(false);
+      }
+    }
   }
 
   const startLocationTracking = async (destination: Club) => {

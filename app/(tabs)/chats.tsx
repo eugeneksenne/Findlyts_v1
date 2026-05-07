@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Image, Platform, Animated } from 'react-native';
-import { Search, Plus, Phone, Video, Users, PhoneCall, Pin, BellOff, Archive, Trash2, CheckCircle } from 'lucide-react-native';
+import { Search, Plus, Phone, Video, Pin, BellOff, Archive, Trash2, CheckCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { supabase } from '../../lib/supabase';
 import { Swipeable } from 'react-native-gesture-handler';
 
 // Dummy data aligned with the nightlife FOMO use case
@@ -19,6 +20,11 @@ export default function ChatsScreen() {
   const [activeTab, setActiveTab] = useState<'friends' | 'groups' | 'calls'>('friends');
   const [activeCallTab, setActiveCallTab] = useState<'all' | 'outgoing' | 'incoming' | 'missed'>('all');
 
+  const groupsData = [
+    { id: 20, name: 'Trip to Switzerland', message: 'This is going to be epic 🔥', time: '08:34', unread: 0, image: 'https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=100&h=100&fit=crop' },
+    { id: 21, name: 'Friday Crew', message: 'We are outside!', time: 'Yesterday', unread: 8, image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop' }
+  ];
+
   const callsData = [
     { id: 1, name: 'Sarah King', type: 'audio', direction: 'missed', time: '10:30 AM', duration: null, image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop' },
     { id: 2, name: 'Mike', type: 'video', direction: 'outgoing', time: 'Yesterday', duration: '5:42', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop' },
@@ -27,13 +33,60 @@ export default function ChatsScreen() {
     { id: 5, name: 'James Lee', type: 'audio', direction: 'outgoing', time: 'Sunday', duration: '2:15', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop' },
   ];
 
-  const filteredCalls = callsData.filter(call => {
-    if (activeCallTab === 'all') return true;
-    if (activeCallTab === 'outgoing') return call.direction === 'outgoing';
-    if (activeCallTab === 'incoming') return call.direction === 'incoming';
-    if (activeCallTab === 'missed') return call.direction === 'missed';
-    return true;
-  });
+
+  const [incomingCall, setIncomingCall] = useState<{ callId: string; caller: string; type: 'video' | 'audio' } | null>(null);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('calls_inbox')
+      .on('broadcast', { event: 'incoming-call' }, ({ payload }: any) => {
+        if (!payload?.callId) return;
+        setIncomingCall({
+          callId: String(payload.callId),
+          caller: payload.caller || 'Unknown',
+          type: payload.type === 'video' ? 'video' : 'audio',
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const startCall = async (callId: number, callType: 'video' | 'audio', callerName: string) => {
+    try {
+      await supabase.channel('calls_inbox').send({
+        type: 'broadcast',
+        event: 'incoming-call',
+        payload: { callId, caller: callerName, type: callType },
+      });
+    } catch (error) {
+      console.warn('Unable to broadcast incoming call signal', error);
+    }
+
+    router.push(`/call/${callId}?role=caller&type=${callType}`);
+  };
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const filteredFriends = useMemo(() => recentChatsData.filter((chat) =>
+    normalizedQuery === '' ||
+    chat.name.toLowerCase().includes(normalizedQuery) ||
+    chat.message.toLowerCase().includes(normalizedQuery)
+  ), [normalizedQuery]);
+
+  const filteredGroups = useMemo(() => groupsData.filter((group) =>
+    normalizedQuery === '' ||
+    group.name.toLowerCase().includes(normalizedQuery) ||
+    group.message.toLowerCase().includes(normalizedQuery)
+  ), [normalizedQuery]);
+
+  const filteredCalls = useMemo(() => callsData.filter((call) => {
+    const matchesDirection = activeCallTab === 'all' || call.direction === activeCallTab;
+    const matchesQuery = normalizedQuery === '' || call.name.toLowerCase().includes(normalizedQuery);
+    return matchesDirection && matchesQuery;
+  }), [activeCallTab, normalizedQuery]);
 
   const renderLeftActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
     return (
@@ -123,6 +176,20 @@ export default function ChatsScreen() {
         </View>
       </View>
 
+
+      {incomingCall && (
+        <View className="mx-4 mb-3 bg-[#151922] border border-[#D900FF]/40 rounded-2xl p-4 flex-row items-center justify-between">
+          <View>
+            <Text className="text-white font-bold">Incoming {incomingCall.type === 'video' ? 'Video' : 'Audio'} Call</Text>
+            <Text className="text-[#8e8e93] text-xs mt-1">{incomingCall.caller}</Text>
+          </View>
+          <View className="flex-row gap-3">
+            <TouchableOpacity onPress={() => setIncomingCall(null)} className="px-3 py-2 rounded-full bg-red-500/20 border border-red-500/40"><Text className="text-red-400 text-xs font-bold">Decline</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => { const active = incomingCall; setIncomingCall(null); if (active) router.push(`/call/${active.callId}?role=receiver&type=${active.type}`); }} className="px-3 py-2 rounded-full bg-[#00FF66]/20 border border-[#00FF66]/40"><Text className="text-[#00FF66] text-xs font-bold">Accept</Text></TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
         
         {activeTab === 'friends' && (
@@ -130,7 +197,7 @@ export default function ChatsScreen() {
             {/* RECENT CHATS */}
             <Text className="text-[#8e8e93] text-[10px] font-bold uppercase tracking-widest mb-3">RECENT</Text>
             <View className="mb-6">
-               {recentChatsData.map((chat, idx) => (
+               {filteredFriends.map((chat) => (
                   <Swipeable
                      key={chat.id}
                      renderLeftActions={renderLeftActions}
@@ -170,15 +237,13 @@ export default function ChatsScreen() {
                   </Swipeable>
                ))}
             </View>
+            {filteredFriends.length === 0 && <Text className="text-[#8e8e93] text-sm text-center py-8">No chats found.</Text>}
            </>
         )}
 
         {activeTab === 'groups' && (
            <View className="mb-6 mt-2">
-              {[
-                 { id: 20, name: 'Trip to Switzerland', message: 'This is going to be epic 🔥', time: '08:34', unread: 0, image: 'https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=100&h=100&fit=crop' },
-                 { id: 21, name: 'Friday Crew', message: 'We are outside!', time: 'Yesterday', unread: 8, image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop' }
-              ].map((group) => (
+              {filteredGroups.map((group) => (
                  <TouchableOpacity 
                     key={group.id}
                     onPress={() => router.push(`/group/${group.id}`)}
@@ -206,6 +271,7 @@ export default function ChatsScreen() {
                  </TouchableOpacity>
               ))}
            </View>
+           {filteredCalls.length === 0 && <Text className="text-[#8e8e93] text-sm text-center py-8">No calls found.</Text>}
         )}
 
         {activeTab === 'calls' && (
@@ -248,12 +314,13 @@ export default function ChatsScreen() {
                           </Text>
                        </View>
                     </View>
-                    <TouchableOpacity onPress={() => router.push(`/call/${call.id}?role=caller&type=${call.type}${call.isGroup ? '&isGroup=true' : ''}`)} className="w-10 h-10 rounded-full bg-white/5 items-center justify-center ml-2 border border-white/5">
+                    <TouchableOpacity onPress={() => startCall(call.id, call.type === 'video' ? 'video' : 'audio', call.name)} className="w-10 h-10 rounded-full bg-white/5 items-center justify-center ml-2 border border-white/5">
                        {call.type === 'video' ? <Video size={18} color="#D900FF" /> : <Phone size={18} color="#D900FF" />}
                     </TouchableOpacity>
                  </TouchableOpacity>
               ))}
            </View>
+           {filteredCalls.length === 0 && <Text className="text-[#8e8e93] text-sm text-center py-8">No calls found.</Text>}
         )}
 
       </ScrollView>

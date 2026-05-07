@@ -14,7 +14,7 @@ export default function CallDetailsScreen() {
           <ChevronLeft size={28} color="#fff" />
         </TouchableOpacity>
         <Text className="text-white text-lg font-bold">Sarah King</Text>
-        <TouchableOpacity className="p-2 w-12 items-end rounded-full">
+        <TouchableOpacity onPress={() => router.push('/chat/info/1')} className="p-2 w-12 items-end rounded-full">
            <MoreHorizontal size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -56,7 +56,7 @@ export default function CallDetailsScreen() {
             <Text className="text-white text-xs font-medium">Message</Text>
           </View>
           <View className="items-center">
-            <TouchableOpacity className="w-14 h-14 rounded-full bg-white/5 border border-white/10 items-center justify-center mb-2">
+            <TouchableOpacity onPress={() => router.push('/chat/info/1')} className="w-14 h-14 rounded-full bg-white/5 border border-white/10 items-center justify-center mb-2">
               <MoreHorizontal size={24} color="#8e8e93" />
             </TouchableOpacity>
             <Text className="text-white text-xs font-medium">More</Text>
@@ -74,10 +74,10 @@ export default function CallDetailsScreen() {
            <Text className="text-white font-bold text-2xl mb-1">Missed Call</Text>
            <Text className="text-[#a1a1aa] text-base mb-6 font-medium">from Sarah King</Text>
            <View className="flex-row gap-3">
-              <TouchableOpacity className="flex-[1.2] bg-[#D900FF]/20 py-3.5 rounded-xl items-center border border-[#D900FF]/40">
+              <TouchableOpacity onPress={() => router.push('/call/1?role=caller&type=voice')} className="flex-[1.2] bg-[#D900FF]/20 py-3.5 rounded-xl items-center border border-[#D900FF]/40">
                  <Text className="text-white font-semibold text-base">Call Back</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-white/5 py-3.5 rounded-xl items-center border border-white/10">
+              <TouchableOpacity onPress={() => router.push('/chat/1')} className="flex-1 bg-white/5 py-3.5 rounded-xl items-center border border-white/10">
                  <Text className="text-white font-semibold text-base">Message</Text>
               </TouchableOpacity>
            </View>

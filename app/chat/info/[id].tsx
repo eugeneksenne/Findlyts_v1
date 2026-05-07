@@ -8,7 +8,6 @@ export default function ChatInfoScreen() {
   const router = useRouter();
   const [showDisappearing, setShowDisappearing] = useState(false);
   const [disappearSetting, setDisappearSetting] = useState('Off');
-  const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
     <SafeAreaView className="flex-1 bg-[#0D0F14]" style={{ paddingTop: Platform.OS === 'android' ? 40 : 0 }}>
@@ -41,13 +40,13 @@ export default function ChatInfoScreen() {
 
          {/* Action Buttons */}
          <View className="flex-row justify-between mb-8 px-6">
-            <TouchableOpacity className="items-center">
+            <TouchableOpacity className="items-center" onPress={() => router.push(`/call/${id}?role=caller&type=voice`)}>
                <View className="w-12 h-12 rounded-full bg-white/5 items-center justify-center mb-2">
                   <Phone size={22} color="#fff" />
                </View>
                <Text className="text-[#8e8e93] text-xs font-medium">Audio</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="items-center">
+            <TouchableOpacity className="items-center" onPress={() => router.push(`/call/${id}?role=caller&type=video`)}>
                <View className="w-12 h-12 rounded-full bg-white/5 items-center justify-center mb-2">
                   <Video size={24} color="#fff" />
                </View>
@@ -59,7 +58,7 @@ export default function ChatInfoScreen() {
                </View>
                <Text className="text-[#8e8e93] text-xs font-medium">Search</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="items-center">
+            <TouchableOpacity className="items-center" onPress={() => router.push('/settings-advanced/notifications')}>
                <View className="w-12 h-12 rounded-full bg-white/5 items-center justify-center mb-2">
                   <MicOff size={22} color="#fff" />
                </View>

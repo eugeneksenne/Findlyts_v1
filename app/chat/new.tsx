@@ -25,6 +25,11 @@ export default function NewChatScreen() {
   };
 
   const selectedCount = contacts.filter(c => c.selected).length;
+  const filteredContacts = contacts.filter((contact) =>
+    searchQuery.trim() === '' ||
+    contact.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+    contact.handle.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-[#0D0F14]" style={{ paddingTop: Platform.OS === 'android' ? 40 : 0 }}>
@@ -34,7 +39,7 @@ export default function NewChatScreen() {
           <ChevronLeft size={28} color="#fff" />
         </TouchableOpacity>
         <Text className="text-white text-lg font-bold">New Chat</Text>
-        <TouchableOpacity className="p-1">
+        <TouchableOpacity onPress={() => router.push('/group/1')} className="p-1">
           <Edit size={22} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -55,7 +60,7 @@ export default function NewChatScreen() {
       </View>
 
       {/* Create Group Button */}
-      <TouchableOpacity className="px-4 flex-row items-center mb-6">
+      <TouchableOpacity onPress={() => router.push('/group/1')} className="px-4 flex-row items-center mb-6">
         <View className="w-12 h-12 rounded-full bg-[#D900FF]/20 items-center justify-center mr-4">
           <Users size={20} color="#D900FF" />
         </View>
@@ -65,7 +70,7 @@ export default function NewChatScreen() {
       {/* Contacts List */}
       <View className="flex-1 flex-row relative">
          <ScrollView showsVerticalScrollIndicator={false} className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 100 }}>
-            {contacts.map((contact, idx) => (
+            {filteredContacts.map((contact) => (
                <TouchableOpacity 
                   key={contact.id} 
                   onPress={() => toggleSelect(contact.id)}
