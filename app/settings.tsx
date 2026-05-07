@@ -11,32 +11,32 @@ const SETTINGS_SECTIONS = [
   {
     title: 'Account',
     items: [
-      { id: 'edit_profile', icon: User, label: 'Edit Profile', type: 'link' },
-      { id: 'account_info', icon: Settings2, label: 'Account Information', type: 'link' },
+      { id: 'edit_profile', icon: User, label: 'Edit Profile', type: 'link', href: '/profile/1' },
+      { id: 'account_info', icon: Settings2, label: 'Account Information', type: 'link', href: '/user/1' },
     ]
   },
   {
     title: 'Privacy & Visibility',
     items: [
-      { id: 'location_vis', icon: MapPin, label: 'Location Visibility', type: 'link', value: 'OFF' },
-      { id: 'profile_vis', icon: Eye, label: 'Profile Visibility', type: 'link' },
-      { id: 'discoverability', icon: Globe, label: 'Discoverability', type: 'link' },
+      { id: 'location_vis', icon: MapPin, label: 'Location Visibility', type: 'link', value: 'OFF', href: '/settings-advanced/location-vis' },
+      { id: 'profile_vis', icon: Eye, label: 'Profile Visibility', type: 'link', href: '/settings-advanced/profile-vis' },
+      { id: 'discoverability', icon: Globe, label: 'Discoverability', type: 'link', href: '/settings-advanced/discoverability' },
     ]
   },
   {
     title: 'Safety',
     items: [
       { id: 'nightguard', icon: Shield, label: 'NightGuard Settings', type: 'link', href: '/nightguard' },
-      { id: 'safety_blocking', icon: ShieldAlert, label: 'Safety & Blocking', type: 'link' },
+      { id: 'safety_blocking', icon: ShieldAlert, label: 'Safety & Blocking', type: 'link', href: '/settings-advanced/safety-blocking' },
     ]
   },
   {
     title: 'Preferences',
     items: [
-      { id: 'notifications', icon: Bell, label: 'Notifications', type: 'link' },
-      { id: 'feed', icon: Layout, label: 'Feed & Content', type: 'link' },
-      { id: 'camera', icon: Camera, label: 'Camera & Media', type: 'link' },
-      { id: 'map_loc', icon: Map, label: 'Map & Location', type: 'link' },
+      { id: 'notifications', icon: Bell, label: 'Notifications', type: 'link', href: '/settings-advanced/notifications' },
+      { id: 'feed', icon: Layout, label: 'Feed & Content', type: 'link', href: '/settings-advanced/feed-content' },
+      { id: 'camera', icon: Camera, label: 'Camera & Media', type: 'link', href: '/settings-advanced/camera-media' },
+      { id: 'map_loc', icon: Map, label: 'Map & Location', type: 'link', href: '/settings-advanced/map-location' },
     ]
   },
   {
@@ -49,8 +49,8 @@ const SETTINGS_SECTIONS = [
   {
     title: 'Support & About',
     items: [
-      { id: 'support', icon: HelpCircle, label: 'Support & Help', type: 'link' },
-      { id: 'about', icon: Info, label: 'About FOMO', type: 'link' },
+      { id: 'support', icon: HelpCircle, label: 'Support & Help', type: 'link', href: '/settings-advanced/support' },
+      { id: 'about', icon: Info, label: 'About FOMO', type: 'link', href: '/settings-advanced/about' },
     ]
   }
 ];
@@ -117,7 +117,7 @@ export default function SettingsScreen() {
                 {section.items.map((item, itemIdx) => (
                    <TouchableOpacity 
                      key={item.id}
-                     onPress={() => item.href ? router.push(item.href as any) : null}
+                     onPress={() => router.push((item.href || `/settings-advanced/${item.id}`) as any)}
                      className={`flex-row items-center justify-between p-4 ${itemIdx < section.items.length - 1 ? 'border-b border-white/5' : ''}`}
                    >
                      <View className="flex-row items-center">
