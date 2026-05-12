@@ -1,20 +1,30 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Findlyts_v1 - Nightlife Discovery App for Johannesburg
 
-# Run and deploy your AI Studio app
+## Features
+- Live club discovery with Flash Drops
+- Interactive map with real-time status
+- Trending events and FOMO alerts
+- Social check-ins and chat
+- Safety features (Nightguard)
 
-This contains everything you need to run your app locally.
+## Tech Stack
+- Expo + React Native
+- Expo Router
+- TypeScript
+- Tailwind (NativeWind)
+- Supabase (Auth + DB + Realtime)
 
-View your app in AI Studio: https://ai.studio/apps/90f68bb5-af1f-4070-a11e-6b7318e607bd
+## Setup
 
-## Run Locally
+1. Clone the repo
+2. `npm install`
+3. Copy `.env.example` to `.env.local`
+4. Add your Supabase URL and Anon Key
+5. `npx expo start`
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Roadmap
+- [x] UI Foundation & Types
+- [x] Component Refactoring
+- [ ] Full Supabase Integration
+- [ ] Auth Flow
+- [ ] Live Features
