@@ -1,24 +1,22 @@
 # Findlyts_v1 - Nightlife Discovery App for Johannesburg
 
-A vibrant social app for discovering clubs, events, and nightlife in Johannesburg. Built with Expo React Native, focusing on real-time experiences and safety.
+## Description
+A vibrant social discovery mobile app focused on Johannesburg's nightlife scene. Find clubs, experience Flash Drops, connect with friends, and never miss the party.
 
 ## ✨ Features
-
-- **Live Flash Drops** - Time-sensitive club events
-- **Interactive Map** - Real-time club status and navigation
-- **Trending & FOMO** - What's hot right now
-- **Social Check-ins & Chat**
-- **Nightguard Safety** - SOS, trusted contacts
-- **Supabase Backend** - Auth, DB, Realtime
+- **Live Discovery** - Trending clubs and real-time Flash Drops
+- **Interactive Map** - Find venues with live status and routing
+- **Social** - Check-ins, chat, and friend activity
+- **Flash Drops** - Time-limited events and promotions
+- **Nightguard Safety** - SOS, trusted contacts, location sharing
+- **FOMO Alerts** - Push notifications for hot nights
 
 ## 🛠 Tech Stack
-
-- Expo + React Native
-- Expo Router (App Router)
-- TypeScript
-- NativeWind (Tailwind)
-- Supabase (Auth + Postgres + Realtime)
-- react-native-maps
+- **Frontend**: Expo (React Native) + Expo Router
+- **Language**: TypeScript
+- **Styling**: NativeWind (Tailwind)
+- **Backend**: Supabase (Auth, Postgres, Realtime)
+- **Maps**: react-native-maps + OSRM routing
 
 ## 🚀 Quick Start
 
@@ -27,38 +25,34 @@ A vibrant social app for discovering clubs, events, and nightlife in Johannesbur
    git clone https://github.com/eugeneksenne/Findlyts_v1.git
    cd Findlyts_v1
    ```
+
 2. Install dependencies
    ```bash
    npm install
    ```
+
 3. Setup environment
    ```bash
    cp .env.example .env.local
    ```
+
 4. Add your Supabase credentials in `.env.local`
+
 5. Run the app
    ```bash
    npx expo start
    ```
 
-## 📱 Screenshots
-
-*(Coming soon)*
-
 ## 📋 Roadmap
-
 - [x] UI Foundation & Types
 - [x] Component Refactoring
-- [ ] Full Supabase Data Layer
+- [ ] Full Supabase Integration
 - [ ] Complete Auth Flow
 - [ ] Realtime Features (Chat, Live Status)
 - [ ] Push Notifications
 - [ ] App Icons & Deployment Prep
 
-## 🤝 Contributing
+## Contributing
+Pull requests welcome! Focus on TypeScript best practices and mobile performance.
 
-Contributions welcome! Open issues or PRs.
-
----
-
-Built with ❤️ for Jozi nightlife
+Built with ❤️ for Jozi nights.

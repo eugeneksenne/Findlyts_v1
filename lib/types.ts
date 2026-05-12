@@ -1,44 +1,28 @@
 export interface Club {
   id: string;
   name: string;
-  distance?: string;
-  vibeScore?: string;
-  isLive?: boolean;
-  viewers?: number;
-  moments?: number;
+  address: string;
+  latitude: number;
+  longitude: number;
+  rating: number;
   image: string;
-  tags: string[];
-  address?: string;
-  lat?: number;
-  lng?: number;
+  isLive: boolean;
+  crowdLevel: 'low' | 'medium' | 'high';
+  musicGenres: string[];
 }
 
 export interface FlashDrop {
   id: string;
+  clubId: string;
   title: string;
-  club: string;
-  distance: string;
-  vibe: string;
-  timeLeft: string;
-  image: string;
-  destination?: { lat: number; lng: number };
+  description: string;
+  expiresIn: number;
+  discount: string;
 }
 
-export interface UserSuggestion {
+export interface UserProfile {
   id: string;
   name: string;
-  mutuals: number;
-  image: string;
+  avatar: string;
+  bio?: string;
 }
-
-export interface Category {
-  id: string;
-  name: string;
-  image: string;
-}
-
-export type SupabaseUser = {
-  id: string;
-  email?: string;
-  user_metadata?: any;
-};
