@@ -1,30 +1,64 @@
 # Findlyts_v1 - Nightlife Discovery App for Johannesburg
 
-## Features
-- Live club discovery with Flash Drops
-- Interactive map with real-time status
-- Trending events and FOMO alerts
-- Social check-ins and chat
-- Safety features (Nightguard)
+A vibrant social app for discovering clubs, events, and nightlife in Johannesburg. Built with Expo React Native, focusing on real-time experiences and safety.
 
-## Tech Stack
+## ✨ Features
+
+- **Live Flash Drops** - Time-sensitive club events
+- **Interactive Map** - Real-time club status and navigation
+- **Trending & FOMO** - What's hot right now
+- **Social Check-ins & Chat**
+- **Nightguard Safety** - SOS, trusted contacts
+- **Supabase Backend** - Auth, DB, Realtime
+
+## 🛠 Tech Stack
+
 - Expo + React Native
-- Expo Router
+- Expo Router (App Router)
 - TypeScript
-- Tailwind (NativeWind)
-- Supabase (Auth + DB + Realtime)
+- NativeWind (Tailwind)
+- Supabase (Auth + Postgres + Realtime)
+- react-native-maps
 
-## Setup
+## 🚀 Quick Start
 
 1. Clone the repo
-2. `npm install`
-3. Copy `.env.example` to `.env.local`
-4. Add your Supabase URL and Anon Key
-5. `npx expo start`
+   ```bash
+   git clone https://github.com/eugeneksenne/Findlyts_v1.git
+   cd Findlyts_v1
+   ```
+2. Install dependencies
+   ```bash
+   npm install
+   ```
+3. Setup environment
+   ```bash
+   cp .env.example .env.local
+   ```
+4. Add your Supabase credentials in `.env.local`
+5. Run the app
+   ```bash
+   npx expo start
+   ```
 
-## Roadmap
+## 📱 Screenshots
+
+*(Coming soon)*
+
+## 📋 Roadmap
+
 - [x] UI Foundation & Types
 - [x] Component Refactoring
-- [ ] Full Supabase Integration
-- [ ] Auth Flow
-- [ ] Live Features
+- [ ] Full Supabase Data Layer
+- [ ] Complete Auth Flow
+- [ ] Realtime Features (Chat, Live Status)
+- [ ] Push Notifications
+- [ ] App Icons & Deployment Prep
+
+## 🤝 Contributing
+
+Contributions welcome! Open issues or PRs.
+
+---
+
+Built with ❤️ for Jozi nightlife
